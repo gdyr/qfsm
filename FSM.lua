@@ -176,6 +176,7 @@ local allowLoop = Properties["Allow Looping"].Value;
 
 for i = 1, numStates do
     Controls.Trigger[i].EventHandler = function(c)
+        if(LOCKOUT) then return; end;
         local currentState = math.floor(Controls["Current State"].Value);
         if direction == "Sequential" then
             local ok = currentState + 1 == i;
@@ -190,8 +191,12 @@ for i = 1, numStates do
             local crosspoint = (currentState - 1) * numStates + i;
             if(not Controls["Allow To"][crosspoint].Boolean) then return; end;
         end;
-        Controls["Current State"].Value = i;
-        updateLeds(i);
+        LOCKOUT = true;
+        Timer.CallAfter(function()
+            Controls["Current State"].Value = i;
+            updateLeds(i);
+            LOCKOUT = false;
+        end, 0);
     end;
 end;
 
